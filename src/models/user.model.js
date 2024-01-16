@@ -32,9 +32,6 @@ const userSchema = new Schema(
       type: String, //cloudinary url
       required: true,
     },
-    coverImage: {
-      type: String, // cloudinary url
-    },
     password: {
       type: String,
       required: [true, "password is required"],
@@ -72,7 +69,7 @@ userSchema.methods.generateAccessToken = function () {
   );
 };
 
-userSchema.methods.generateRefresToken = function () {
+userSchema.methods.generateRefreshToken = function () {
   return jwt.sign(
     {
       _id: this_id,
