@@ -26,4 +26,4 @@ const productSchema = new Schema(
   { timestamps: true }
 );
 
-export const Video = mongoose.model("Product", productSchema);
+export const Product = mongoose.model("Product", productSchema);

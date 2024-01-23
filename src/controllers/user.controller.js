@@ -208,4 +208,39 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
   }
 });
 
-export { registerUser, loginUser, logoutUser, refreshAccessToken };
+const addToCart = asyncHandler(async (req, res) => {
+  const { productId } = req.body;
+  if (!productId) {
+    throw new ApiError(400, "Product ID is required");
+  }
+  const user = await User.findById(req?.user?._id);
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  const updatedUserCart = await user.addToCart(productId);
+  return res
+    .status(200)
+    .json(new ApiResponse(200, updatedUserCart, "Product added to cart"));
+});
+
+const removeFromCart = asyncHandler(async (req, res) => {
+  const { productId } = req.body;
+  const user = await User.findById(req.user._id);
+  if (!productId) {
+    throw new ApiError(400, "Product ID is required");
+  }
+  const updatedCartItems = await user.removeFromCart(productId);
+  return res
+    .status(200)
+    .json(new ApiResponse(200, updatedCartItems, "Product removed from cart"));
+});
+
+export {
+  registerUser,
+  loginUser,
+  logoutUser,
+  refreshAccessToken,
+  addToCart,
+  removeFromCart,
+};

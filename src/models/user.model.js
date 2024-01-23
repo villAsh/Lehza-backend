@@ -1,6 +1,8 @@
 import mongoose, { Schema } from "mongoose";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import { Product } from "./product.model.js";
+import { ApiError } from "../utils/ApiError.util.js";
 
 const userSchema = new Schema(
   {
@@ -38,6 +40,18 @@ const userSchema = new Schema(
     },
     refreshToken: {
       type: String,
+    },
+    cart: {
+      items: [
+        {
+          productId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Product",
+            required: true,
+          },
+          quantity: { type: Number, required: true },
+        },
+      ],
     },
   },
   { timestamps: true }
@@ -83,6 +97,57 @@ userSchema.methods.generateRefreshToken = async function () {
       expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
     }
   );
+};
+
+userSchema.methods.addToCart = async function (productId) {
+  const product = await Product.findById({
+    _id: productId,
+  });
+  console.log(product);
+  console.log("product id...", productId);
+  if (!product) {
+    throw new ApiError(404, "Product not found!!!");
+  }
+
+  const cartProductIndex = this.cart.items.findIndex((cp) => {
+    console.log("cp", cp.productId);
+    return productId.toString() === cp.productId.toString();
+  });
+
+  let newQuantity = 1;
+  const updatedCartItems = [...this.cart.items];
+
+  if (cartProductIndex >= 0) {
+    newQuantity = this.cart.items[cartProductIndex].quantity + 1;
+    updatedCartItems[cartProductIndex].quantity = newQuantity;
+  } else {
+    updatedCartItems.push({
+      productId: productId,
+      quantity: newQuantity,
+    });
+  }
+  const updatedCart = {
+    items: updatedCartItems,
+  };
+
+  this.cart = updatedCart;
+  const user = await User.updateOne({ cart: this.cart });
+  return user;
+};
+
+userSchema.methods.removeFromCart = async function (productId) {
+  console.log("product id",productId);
+  const cartProductIndex = this.cart.items.findIndex(
+    (cp) => cp.productId.toString() === productId.toString()
+  );
+  console.log("cart product index....", cartProductIndex);
+  if (cartProductIndex === -1) {
+    throw new ApiError(404, "Product not found in the cart");
+  }
+
+  this.cart.items.splice(cartProductIndex, 1);
+
+  await this.save();
 };
 
 export const User = mongoose.model("User", userSchema);

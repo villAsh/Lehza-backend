@@ -1,9 +1,11 @@
 import { Router } from "express";
 import {
+  addToCart,
   loginUser,
   logoutUser,
   refreshAccessToken,
   registerUser,
+  removeFromCart,
 } from "../controllers/user.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
@@ -27,4 +29,7 @@ router.route("/logout").post(verifyJWT, logoutUser);
 
 router.route("/refresh-token").post(refreshAccessToken);
 
+// router.route("/add-to-cart").post(verifyJWT, addToCart);
+
+// router.route("/remove-from-cart").post(verifyJWT, removeFromCart);
 export default router;
