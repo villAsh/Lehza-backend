@@ -15,6 +15,7 @@ const generateAccessAndRefreshToken = async (userId) => {
 
     return { accessToken, refreshToken };
   } catch (error) {
+    console.log(error);
     throw new ApiError(
       500,
       "Something went wrong while generating refresh and access token"
@@ -84,7 +85,7 @@ const loginUser = asyncHandler(async (req, res) => {
   const { username, email, password } = req.body;
 
   //username or email
-  if (!username || !email) {
+  if (!username && !email) {
     throw new ApiError(400, "Username or Email is required...");
   }
 
@@ -107,8 +108,7 @@ const loginUser = asyncHandler(async (req, res) => {
 
   //send cookie
   const loggedInUser = await User.findById(user._id).select(
-    "-password",
-    "-refreshToken"
+    "-password -refreshToken"
   );
   const option = {
     httpOnly: true,
@@ -136,8 +136,8 @@ const logoutUser = asyncHandler(async (req, res) => {
   //req body -> data
   //find user
   await User.findByIdAndUpdate(req.user._id, {
-    $set: {
-      refreshToken: undefined,
+    $unset: {
+      refreshToken: 1,
     },
   });
 
