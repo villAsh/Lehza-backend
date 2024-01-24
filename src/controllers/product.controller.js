@@ -17,7 +17,7 @@ const getAllProducts = asyncHandler(async (req, res) => {
 });
 
 const getProductDetails = asyncHandler(async (req, res) => {
-  const { productId } = req.body;
+  const { productId } = req.params;
   if (!productId) {
     throw new ApiError(401, "ProductId is not valid!!!");
   }
@@ -33,5 +33,12 @@ const getProductDetails = asyncHandler(async (req, res) => {
   }
 });
 
+const postComment = asyncHandler(async (req, res) => {
+  //req.body -> userId, productId, comment
+  //validate
+  //save
+  const { productId, user, comment } = req.body;
+  console.log({ productId, user, comment });
+});
 
-export { getAllProducts, getProductDetails };
+export { getAllProducts, getProductDetails, postComment };
